@@ -17,8 +17,39 @@ Rust can be very difficult to appreciate and fully understand.
 Rust is an incredibly powerful, and very unique
 programming language that can have a very steep learning curve.
 
-Hopefully, contextualizing it by experimenting with **language
-values** and arriving at Rust will help others grok the Rust language.
+So, let's contextualize it by experimenting with
+language design!
+
+### If this guide helped you, please consider doing one or more of the following
+- star this repo
+- file an issue to say thanks
+- share this with other rust-curious individuals
+
+### If this guide is missing something
+please [file an issue](https://www.github.com/cakekindel/cs-to-rust/issues/new)!
 
 ## Language Values
+It's important that we understand the **motivation** for changing C# into Rust.
+You don't have to agree with every decision that is made, but please make an
+effort to understand & internalize the core values of both languages.
+
+### List of values
+Here is a very rough list of programming language core values,
+shamelessly ripped from [bcantrill](https://github.com/bcantrill)'s
+[awesome 2018 talk on Rust](https://www.youtube.com/watch?v=2wZ1pCpJUIM),
+and programming values in general.
+
+| | | |
+|---|---|---|
+|Approachability|Integrity|Robust|
+|Availability|Maintainability|Safety|
+|Compatibility|Measurability|Security|
+|Composability|Operability|Simplicity|
+|Debuggability|Performance|Stability|
+|Expressiveness|Portability|Thoroughness|
+|Extensibility|Resiliency|Transparency|
+|Interoperability|Rigor|Velocity|
+
+### C#
+
 
