@@ -13,6 +13,7 @@ Rust, with the end goal of arriving at the Rust language.
     - [List of values](#list-of-values)
     - [C# or Java](#cs-or-java)
     - [Rust](#rust)
+    - [How to interpret](#how-to-interpret)
 
 ## Why this guide exists
 As someone who was at one point only comfortable
