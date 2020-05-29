@@ -176,9 +176,23 @@ body is an expression.
 ```cs
 public int Roll()
 {
-    
+    var random = new Random();
+
+    random.Next(1, 6)
+}
+
+// real C# equivalent:
+public int Roll()
+{
+    var random = new Random();
+
+    return random.Next(1, 6);
 }
 ```
+
+You don't have to love this language feature, but in a world where everything
+is an expression, you'll probably come across **function bodies** that
+end with an expression rather than a return statement.
 
 ## Enums
 The Rust `enum` idiom, and the C# `enum` idiom are _very_ different.
@@ -195,18 +209,7 @@ public enum Coin
 
 It may be helpful to think of an "instance" of this `Coin` enum as `1` OR `2` OR `3`.
 
-Following this, imagine you could have a C# enum that could contain a reference type:
-
-```cs
-public enum Coin
-{
-    Quarter = "Quarter",
-    Nickel = "Nickel",
-    Dime = "Dime",
-}
-```
-
-What if enums supported each _Variant_ having different types?
+What if enums supported each member, or _Variant_, having different types?
 
 ```cs
 public enum Coin
@@ -221,4 +224,72 @@ public enum Coin
 
 Now this `Coin` enum means "0.25 or 0.05 or null or 1"
 
-TODO: the rest
+When handling this `Coin` enum, one might use the
+pattern-matching features in C# 8 like so:
+
+```cs
+public int AppraiseCoin(Coin coin)
+{
+    return coin switch
+    {
+        Coin.Quarter => /* algorithm to appraise quarters? */,
+        // <snip>
+    };
+}
+```
+
+What if the types contained in enums did not have to be constant values?
+**What if** "instances" of enum variants could have a `struct` contained within?
+
+Let's say you're dealing with IP Addresses and want to have a strongly-typed
+differentiation between IPV4 addresses & IPV6:
+```cs
+public enum IpAddress
+{
+    V4(string),
+    V6(string),
+}
+```
+
+In this example, if one had a variable of type `IpAddress`,
+the variable contains a string that represents the full IP address.
+
+This allows one to use patterns like this:
+```cs
+public TcpConnection Connect(IpAddress addr)
+{
+    return addr switch
+    {
+        IpAddress.V4(addrV4) => ConnectIpV4(addrV4),
+        IpAddress.V6(addrV6) => ConnectIpV6(addrV6),
+    }
+}
+```
+
+Contrast this with a vanilla C# implementation:
+```cs
+public TcpConnection Connect(IpAddress addr)
+{
+    if (IsIpV4(addr))
+    {
+        return ConnectIpV4(addr);
+    }
+    else if (IsIpV6(addr))
+    {
+        return ConnectIpV6(addr);
+    }
+}
+
+private bool IsIpV4(string addrRaw) { /* <snip> */ } 
+private bool IsIpV6(string addrRaw) { /* <snip> */ } 
+```
+
+A couple things to note here:
+- Readers of this code, or recievers of `string addr` have no hints at the type level
+    that the given string is an Ip Address v4, v6, or even an Ip Address at all.
+
+- By using Enums this way, if a hypothetical IPV8 was introduced, **all code**
+    pattern-matching over IpAddress _immediately_ breaks, telling the maintainers
+    all the places where the new case is not considered.
+
+
