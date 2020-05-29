@@ -120,18 +120,24 @@ does not resolve to a value, not even `void`. In this language, there is a rough
 tacit rule that each line in your program's code is an instructional step,
 not an expression that resolves to a value.
 
+Believe it or not, you already know this! If you're familiar with a ternary
+statement, you can reason about `if / else` statements as being the **statement**
+based conditional idiom, while ternary statements are the **expression-based**
+conditional idiom.
+
+Imagine if **both** methods in the following code snippet were OK with the
+C# compiler, and semantically equivalent:
+
 ```cs
 public class Game
 {
     private bool canMove = true;
-
-    // This code is OK
+    
     public void GetSpacesToMove_Ternary()
     {
         return this.canMove ? new Dice().Roll() : 0;
     }
 
-    // This code does not compile
     public void GetSpacesToMove_IfStatements()
     {
         return if (this.canMove)
@@ -145,6 +151,32 @@ public class Game
     }
 
     // <snip>
+}
+```
+
+If you're wondering "why would you make this change? We already have ternary statements,
+and this is _more_ verbose!", with some syntactic changes to `if` statements, you
+could argue that ternary statements are wholly unnecessary:
+
+```cs
+// ternary
+this.canMove ? new Dice().Roll() : 0
+
+// vs our tersified if statements:
+if this.canMove { new Dice().Roll() } else { 0 }
+```
+
+You don't have to prefer the expression-based terse if statements, but now you're familiar with
+the semantics of Rust's conditional statements.
+
+This is important, because if everything resolves to a value,
+then you can make the `return` statements **optional** if the last line in a function
+body is an expression.
+
+```cs
+public int Roll()
+{
+    
 }
 ```
 
