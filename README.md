@@ -97,7 +97,7 @@ C# / Java values being approachable, classical (in the C-influenced, OOP imperat
 and performant. The two languages are geared towards moving quickly with a moderate amount
 of type safety.
 
-Rust is to C# / Java as C# / Java is to Python. Rust introduces some rules of significant
+Rust is to C#, as C# is to Python. Rust introduces some rules of significant
 complexity to guarantee memory & thread safety at compile time. This means that in exchange
 for some cognitive load & extra development time, you are rewarded with an extremely fast
 program that is most likely going to work exactly as you expect it to.
