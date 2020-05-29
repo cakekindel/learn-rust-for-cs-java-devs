@@ -257,35 +257,41 @@ the variable contains a string that represents the full IP address.
 
 This allows one to use patterns like this:
 ```cs
-public TcpConnection Connect(IpAddress addr)
+public class TcpHelper
 {
-    return addr switch
+    public TcpConnection Connect(IpAddress addr)
     {
-        IpAddress.V4(addrV4) => ConnectIpV4(addrV4),
-        IpAddress.V6(addrV6) => ConnectIpV6(addrV6),
+        return addr switch
+        {
+            IpAddress.V4(addrV4) => ConnectIpV4(addrV4),
+            IpAddress.V6(addrV6) => ConnectIpV6(addrV6),
+        }
     }
-}
 
-private TcpConnection ConnectIpV4(string addrRaw);
-private TcpConnection ConnectIpV6(string addrRaw);
+    private TcpConnection ConnectIpV4(string addrRaw);
+    private TcpConnection ConnectIpV6(string addrRaw);
+}
 ```
 
 Contrast this with a vanilla C# implementation:
 ```cs
-public TcpConnection Connect(IpAddress addr)
+public class TcpHelper
 {
-    if (IsIpV4(addr))
+    public TcpConnection Connect(IpAddress addr)
     {
-        return ConnectIpV4(addr);
+        if (IsIpV4(addr))
+        {
+            return ConnectIpV4(addr);
+        }
+        else if (IsIpV6(addr))
+        {
+            return ConnectIpV6(addr);
+        }
     }
-    else if (IsIpV6(addr))
-    {
-        return ConnectIpV6(addr);
-    }
-}
 
-private bool IsIpV4(string addrRaw) { /* <snip> */ } 
-private bool IsIpV6(string addrRaw) { /* <snip> */ } 
+    private bool IsIpV4(string addrRaw) { /* <snip> */ } 
+    private bool IsIpV6(string addrRaw) { /* <snip> */ } 
+}
 ```
 
 A couple things to note here:
