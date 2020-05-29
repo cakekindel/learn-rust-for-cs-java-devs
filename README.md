@@ -14,7 +14,12 @@ Rust, with the end goal of arriving at the Rust language.
     - [C# or Java](#cs-or-java)
     - [Rust](#rust)
     - [How to interpret](#how-to-interpret)
-- [Expression orientation](#expression-orientation)
+- [Expression oriented](#expression-oriented)
+- [Enums](#enums)
+    - [Variants of different types](#variants-of-different-types)
+    - [Variant "Instances"](#variant-instances)
+    - [Tuple Variants](#tuple-variants)
+    - [Struct Variants](#struct-variants)
 
 ## Why this guide exists
 As someone who was at one point only comfortable
