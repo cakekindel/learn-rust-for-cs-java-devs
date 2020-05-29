@@ -239,6 +239,7 @@ public int AppraiseCoin(Coin coin)
 ```
 
 What if the types contained in enums did not have to be constant values?
+
 **What if** "instances" of enum variants could have a `struct` contained within?
 
 Let's say you're dealing with IP Addresses and want to have a strongly-typed
@@ -264,6 +265,9 @@ public TcpConnection Connect(IpAddress addr)
         IpAddress.V6(addrV6) => ConnectIpV6(addrV6),
     }
 }
+
+private TcpConnection ConnectIpV4(string addrRaw);
+private TcpConnection ConnectIpV6(string addrRaw);
 ```
 
 Contrast this with a vanilla C# implementation:
