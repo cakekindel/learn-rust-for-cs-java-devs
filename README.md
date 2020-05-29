@@ -14,6 +14,7 @@ Rust, with the end goal of arriving at the Rust language.
     - [C# or Java](#cs-or-java)
     - [Rust](#rust)
     - [How to interpret](#how-to-interpret)
+- [Expression orientation](#expression-orientation)
 
 ## Why this guide exists
 As someone who was at one point only comfortable
@@ -96,3 +97,96 @@ complexity to guarantee memory & thread safety at compile time. This means that 
 for some cognitive load & extra development time, you are rewarded with an extremely fast
 program that is most likely going to work exactly as you expect it to.
 
+## Expression Oriented
+In Java & C#, the _statements_ in a code block do not resolve to values.
+
+For example:
+```cs
+public class Dice
+{
+    public void Roll()
+    {
+        var random = new Random();
+        int diceVal = random.Next(1, 6);
+
+        return diceVal;
+    }
+}
+```
+
+In our example, `new Random()` is a C# _expression_ that resolves to an instance
+of the `Random` class. `var random = new Random()` however is a _statement_ that
+does not resolve to a value, not even `void`. In this language, there is a rough
+tacit rule that each line in your program's code is an instructional step,
+not an expression that resolves to a value.
+
+```cs
+public class Game
+{
+    private bool canMove = true;
+
+    // This code is OK
+    public void GetSpacesToMove_Ternary()
+    {
+        return this.canMove ? new Dice().Roll() : 0;
+    }
+
+    // This code does not compile
+    public void GetSpacesToMove_IfStatements()
+    {
+        return if (this.canMove)
+        {
+            new Dice().Roll();
+        }
+        else
+        {
+            0;
+        }
+    }
+
+    // <snip>
+}
+```
+
+## Enums
+The Rust `enum` idiom, and the C# `enum` idiom are _very_ different.
+
+Given a C#-style enum like this:
+```cs
+public enum Coin
+{
+    Quarter = 1,
+    Nickel = 2,
+    Dime = 3
+}
+```
+
+It may be helpful to think of an "instance" of this `Coin` enum as `1` OR `2` OR `3`.
+
+Following this, imagine you could have a C# enum that could contain a reference type:
+
+```cs
+public enum Coin
+{
+    Quarter = "Quarter",
+    Nickel = "Nickel",
+    Dime = "Dime",
+}
+```
+
+What if enums supported each _Variant_ having different types?
+
+```cs
+public enum Coin
+{
+    Quarter = 0.25, // float
+    Nickel = 0.05, // float
+    Dollar = 1, // int
+    Hapenny = 0.005, // float
+    Default = null // always null
+}
+```
+
+Now this `Coin` enum means "0.25 or 0.05 or null or 1"
+
+TODO: the rest
