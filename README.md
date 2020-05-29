@@ -209,6 +209,7 @@ public enum Coin
 
 It may be helpful to think of an "instance" of this `Coin` enum as `1` OR `2` OR `3`.
 
+### Variants of different types
 What if enums supported each member, or _Variant_, having different types?
 
 ```cs
@@ -238,9 +239,8 @@ public int AppraiseCoin(Coin coin)
 }
 ```
 
+### Variant "Instances"
 What if the types contained in enums did not have to be constant values?
-
-**What if** "instances" of enum variants could have a `struct` contained within?
 
 Let's say you're dealing with IP Addresses and want to have a strongly-typed
 differentiation between IPV4 addresses & IPV6:
@@ -295,11 +295,37 @@ public class TcpHelper
 ```
 
 A couple things to note here:
-- Readers of this code, or recievers of `string addr` have no hints at the type level
-    that the given string is an Ip Address v4, v6, or even an Ip Address at all.
+- In the second example, readers of the code or receivers of `string addr`
+    have no hints at the type level that the given string is an Ip Address
+    v4, v6, or even an Ip Address at all.
 
 - By using Enums this way, if a hypothetical IPV8 was introduced, **all code**
     pattern-matching over IpAddress _immediately_ breaks, telling the maintainers
     all the places where the new case is not considered.
 
+**PLEASE STOP READING** until that all makes logical sense as a language feature, and as a construct that you can imagine using.
+
+### Tuple Variants
+That's neat and all, but an IPV4 is a 4-segment string of integers, not a string.
+How could we better represent that constraint with **types** so that requirement
+is enforced at compile-time?
+
+What if these constructs could contain **multiple positional** elements?
+
+```cs
+public enum IpAddress
+{
+    V4(int, int, int, int),
+    V6(string),
+}
+```
+
+### Struct Variants
+let's expand the idea that a variant can contain multiple positional values,
+to multiple **named** values.
+
+Imagine an embedded `struct` in each "instance" of an enum variant:
+```cs
+TODO: EXAMPLE :)
+```
 
