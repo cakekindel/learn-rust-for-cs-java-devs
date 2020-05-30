@@ -114,17 +114,18 @@ This feature works fine in a world where thread safety is not a core concern,
 because we have thread-safe structures available that we can opt-in to, and
 a garbage collector keeping track of data that is relevant and freeing data that is not.
 
-If we wanted to prioritize interoperability with binaries without a runtime, or eke out
-every bit of performance we can from our programs, the GC might get in our way.
+If we wanted to prioritize interoperability with unmanaged code (C / C++),
+or eke out every bit of performance we can from our programs,
+the GC might get in our way.
 
 The unique approach Rust takes to this problem is creating a few dogmatic rules
 that eliminate the need for a garbage collector:
 
 ### The Rust Commandments
-1. All values shall be recursively immutable by default
-1. Only one function or data structure or variable may _own_ a given value
-1. There can be any number of read-only windows to this value
-1. There can be at most 1 piece of code with a mutable access to this value
+1. **All values shall be recursively immutable by default**
+1. **Only one function or data structure or variable may _own_ a given value**
+1. **There can be any number of read-only windows to this value**
+1. **There can be at most 1 piece of code with a mutable access to this value**
 
 By ensuring that a given value can only be mutated by 1 piece of code, we can be sure
 that the data is safe to share across thread boundaries.
