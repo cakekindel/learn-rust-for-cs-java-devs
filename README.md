@@ -129,7 +129,8 @@ Let's keep this question in our pocket for a moment. We've got bigger fish to fr
 
 ## To Kill a Garbage Collector
 If our new Java wanted to prioritize interoperability with unmanaged code (C / C++),
-or eke out every bit of performance we can from our programs, the GC would get in our way.
+and eke out every bit of performance we can from our programs,
+the GC undoubtedly gets in our way.
 
 Pretend for a moment we do not have a Garbage Collector doing its **absolute best**
 to prevent our program from going _yonkers_ gobbling up memory.
@@ -143,12 +144,17 @@ If we prematurely delete things from memory, we'll have difficult to debug use-a
 In contrast, if we never delete things from memory, our program will happily run and gobble
 up system resources until there aren't any left.
 
-### Enter the Data Ownership Model
+### Enter the Rust Commandments
 1. **All values shall be recursively immutable by default**
 1. **Only one function or data structure or variable may _own_ a given value**
 1. **When an owned value goes out of scope, it is immediately freed in memory**
 1. **There can be any number of read-only windows to an owned value**
-1. **There can be at most 1 piece of code with a mutable access to an owned value**
+1. **There can be at most 1 piece of code with a mutable access to a value**
+
+This may sound restrictive, and it is!
+
+If you follow these rules, however, you'll be rewarded with a lightning-fast binary that is
+_guaranteed_ to be free from a slew of common memory defects and _extremely_ predictable.
 
 ## Expression Oriented
 In Java & C#, the _statements_ in a code block do not resolve to values.
