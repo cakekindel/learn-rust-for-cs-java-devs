@@ -15,9 +15,13 @@ Rust, with the end goal of arriving at the Rust language.
     - [Rust](#rust)
     - [How to interpret](#how-to-interpret)
 - [Mutability & Data Races](#mutability-and-data-races)
+    - [How can we determine that a value is thread-safe at compile time?](#how-can-we-determine-that-a-value-is-thread-safe-at-compile-time)
 - [To Kill a Garbage Collector](#to-kill-a-garbage-collector)
-    - [Enter the Rust Commandments](#the-rust-commandments)
-- [Data ownership](#data-ownership)
+    - [How can we determine when a value is safe to delete from memory at compile time?](#how-can-we-determine-when-a-value-is-safe-to-delete-from-memory-at-compile-time)
+- [Enter the Rust Commandments](#enter-the-rust-commandments)
+    - [Mutability](#mutability)
+    - [Data Ownership](#data-ownership)
+    - [Borrowing](#borrowing)
 - [Expression oriented](#expression-oriented)
 - [Enums](#enums)
     - [Variants of different types](#variants-of-different-types)
@@ -139,14 +143,14 @@ to prevent our program from going _yonkers_ gobbling up memory.
 
 A question that **needs** to be answered arises:
 
-### How can we determine when a value is safe to free in memory at compile time?
+### How can we determine when a value is safe to delete from memory at compile time?
 
 If we prematurely delete things from memory, we'll have difficult to debug use-after-free errors.
 
 In contrast, if we never delete things from memory, our program will happily run and gobble
 up system resources until there aren't any left.
 
-### Enter the Rust Commandments
+## Enter the Rust Commandments
 1. **All values shall be recursively immutable by default**
 1. **Only one function or data structure or variable may _own_ a given value**
 1. **When an owned value goes out of scope, it is immediately freed in memory**
@@ -157,6 +161,67 @@ This may sound restrictive, and it is!
 
 If you follow these rules, however, you'll be rewarded with a lightning-fast binary that is
 _guaranteed_ to be free from a slew of common memory defects and _extremely_ predictable.
+
+### Mutability
+Mutability in Rust can be achieved in 2 ways:
+- Mutable ownership
+- Mutable reference
+
+Note that there can only be 1 variable / function / structure with mutable access
+to a value at any given time, in the name of thread safety.
+
+### Data Ownership
+A piece of code _owning_ a piece of data means a few things:
+- The owner can issue any number of read-only references (windows) to the owned data
+- The owner can issue 1 mutable reference (borrow) of the owned data
+- The owner can choose to step into mutating its owned value, but only if there are no
+    mutable borrows existing at that time
+
+An example
+```rust
+pub fn main() {
+    let my_name = String::from("Orion Kindel");
+    my_name = "This doesn't work, because `my_name` is not mutable in this context";
+
+    let mut my_name_mut = my_name;
+    my_name = "This works now, because I _moved_ my_name into my_name_mut, and my_name_mut takes mutable ownership of its String."
+
+    println!("{}", my_name) // This won't compile, because my_name was moved into my_name_mut!
+}
+```
+
+One idea introduced in the above example is Rust's `move` semantics.
+
+It may be helpful when reasoning about rust's ownership and move semantics, to think
+of a variable as being a **_location_** that data is kept in.
+
+When you reference one of these **locations** you're wilfully taking the data out
+of that location, and putting it into a new one.
+
+Please check out the [move semantics section](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html?highlight=move#ways-variables-and-data-interact-move)
+of the rust book for more information on this language feature.
+
+### Borrowing
+Rust introduces a layer on top of the Pointer concept from C / C++ and calls
+the language feature a borrow to distinguish it from that concept.
+
+A value is _borrowed_, rather than moved, with the ampersand `&` keyword.
+
+There are 2 kinds of borrows in Rust; immutable and mutable.
+
+A mutable borrow is taken by modifying the `&` keyword with the `mut`
+keyword, like so:
+
+```rust
+fn add_world(s: &mut String) {
+    s.push_str(", World!");
+}
+
+fn main() {
+    let hw = add_world("Hello".to_string());
+    println!("{}", hw) // prints: "Hello, World!"
+}
+```
 
 ## Expression Oriented
 In Java & C#, the _statements_ in a code block do not resolve to values.
