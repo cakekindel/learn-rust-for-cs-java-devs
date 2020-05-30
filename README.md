@@ -14,7 +14,7 @@ Rust, with the end goal of arriving at the Rust language.
     - [C# or Java](#cs-or-java)
     - [Rust](#rust)
     - [How to interpret](#how-to-interpret)
-- [Mutability](#mutability)
+- [Mutability & Data Races](#mutability-and-data-races)
 - [Data ownership](#data-ownership)
 - [Expression oriented](#expression-oriented)
 - [Enums](#enums)
@@ -106,29 +106,49 @@ complexity to guarantee memory & thread safety at compile time. This means that 
 for some cognitive load & extra development time, you are rewarded with an extremely fast
 program that is most likely going to work exactly as you expect it to.
 
-## Mutability
+## Mutability and Data Races
 In C# / Java, data structures are mutable by default, with the ability for developers
 to opt-out via the `readonly` keyword in some scenarios.
 
 This feature works fine in a world where thread safety is not a core concern,
-because we have thread-safe structures available that we can opt-in to, and
-a garbage collector keeping track of data that is relevant and freeing data that is not.
+because we have:
+- thread-safe structures available that we can opt-in to (e.g. `ConcurrentHashMap`)
+- a garbage collector keeping track of data that is in use, and freeing data that is not.
 
-If we wanted to prioritize interoperability with unmanaged code (C / C++),
-or eke out every bit of performance we can from our programs,
-the GC might get in our way.
+However, if our new Java wants to prioritize thread safety as a primary goal of the
+language, we need to rethink this model.
 
-The unique approach Rust takes to this problem is creating a few dogmatic rules
-that eliminate the need for a garbage collector:
+Shared mutability is the scourge of paralellism - it results in defects that are
+extremely difficult to diagnose and reason about.
 
-### The Rust Commandments
+Rust took this problem, and posed this question:
+
+### How can we determine that a value is thread-safe at compile time?
+
+Let's keep this question in our pocket for a moment. We've got bigger fish to fry.
+
+## To Kill a Garbage Collector
+If our new Java wanted to prioritize interoperability with unmanaged code (C / C++),
+or eke out every bit of performance we can from our programs, the GC would get in our way.
+
+Pretend for a moment we do not have a Garbage Collector doing its **absolute best**
+to prevent our program from going _yonkers_ gobbling up memory.
+
+A question that **needs** to be answered arises:
+
+### How can we determine when a value is safe to free in memory at compile time?
+
+If we prematurely delete things from memory, we'll have difficult to debug use-after-free errors.
+
+In contrast, if we never delete things from memory, our program will happily run and gobble
+up system resources until there aren't any left.
+
+### Enter the Data Ownership Model
 1. **All values shall be recursively immutable by default**
 1. **Only one function or data structure or variable may _own_ a given value**
-1. **There can be any number of read-only windows to this value**
-1. **There can be at most 1 piece of code with a mutable access to this value**
-
-By ensuring that a given value can only be mutated by 1 piece of code, we can be sure
-that the data is safe to share across thread boundaries.
+1. **When an owned value goes out of scope, it is immediately freed in memory**
+1. **There can be any number of read-only windows to an owned value**
+1. **There can be at most 1 piece of code with a mutable access to an owned value**
 
 ## Expression Oriented
 In Java & C#, the _statements_ in a code block do not resolve to values.
