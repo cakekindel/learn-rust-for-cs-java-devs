@@ -14,12 +14,16 @@ Rust, with the end goal of arriving at the Rust language.
     - [C# or Java](#cs-or-java)
     - [Rust](#rust)
     - [How to interpret](#how-to-interpret)
+- [Mutability](#mutability)
+- [Data ownership](#data-ownership)
 - [Expression oriented](#expression-oriented)
 - [Enums](#enums)
     - [Variants of different types](#variants-of-different-types)
     - [Variant "Instances"](#variant-instances)
     - [Tuple Variants](#tuple-variants)
     - [Struct Variants](#struct-variants)
+
+* fart 
 
 ## Why this guide exists
 As someone who was at one point only comfortable
@@ -101,6 +105,29 @@ Rust is to C#, as C# is to Python. Rust introduces some rules of significant
 complexity to guarantee memory & thread safety at compile time. This means that in exchange
 for some cognitive load & extra development time, you are rewarded with an extremely fast
 program that is most likely going to work exactly as you expect it to.
+
+## Mutability
+In C# / Java, data structures are mutable by default, with the ability for developers
+to opt-out via the `readonly` keyword in some scenarios.
+
+This feature works fine in a world where thread safety is not a core concern,
+because we have thread-safe structures available that we can opt-in to, and
+a garbage collector keeping track of data that is relevant and freeing data that is not.
+
+If we wanted to prioritize interoperability with binaries without a runtime, or eke out
+every bit of performance we can from our programs, the GC might get in our way.
+
+The unique approach Rust takes to this problem is creating a few dogmatic rules
+that eliminate the need for a garbage collector:
+
+### The Rust Commandments
+1. All values shall be recursively immutable by default
+1. Only one function or data structure or variable may _own_ a given value
+1. There can be any number of read-only windows to this value
+1. There can be at most 1 piece of code with a mutable access to this value
+
+By ensuring that a given value can only be mutated by 1 piece of code, we can be sure
+that the data is safe to share across thread boundaries.
 
 ## Expression Oriented
 In Java & C#, the _statements_ in a code block do not resolve to values.
