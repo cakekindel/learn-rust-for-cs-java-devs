@@ -29,8 +29,6 @@ Rust, with the end goal of arriving at the Rust language.
     - [Tuple Variants](#tuple-variants)
     - [Struct Variants](#struct-variants)
 
-* fart 
-
 ## Why this guide exists
 As someone who was at one point only comfortable
 in languages and ecosystems heavily geared towards OOP,
@@ -202,10 +200,12 @@ Please check out the [move semantics section](https://doc.rust-lang.org/book/ch0
 of the rust book for more information on this language feature.
 
 ### Borrowing
-Rust introduces a layer on top of the Pointer concept from C / C++ and calls
-the language feature a borrow to distinguish it from that concept.
-
 A value is _borrowed_, rather than moved, with the ampersand `&` keyword.
+
+Borrowing is not dissimilar to a C / C++ pointer; it indicates a
+"window into", or reference of, someone else's owned value.
+
+"Borrow" and "reference" may be used interchangeably.
 
 There are 2 kinds of borrows in Rust; immutable and mutable.
 
