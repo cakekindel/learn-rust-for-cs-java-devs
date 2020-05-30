@@ -15,6 +15,8 @@ Rust, with the end goal of arriving at the Rust language.
     - [Rust](#rust)
     - [How to interpret](#how-to-interpret)
 - [Mutability & Data Races](#mutability-and-data-races)
+- [To Kill a Garbage Collector](#to-kill-a-garbage-collector)
+    - [Enter the Rust Commandments](#the-rust-commandments)
 - [Data ownership](#data-ownership)
 - [Expression oriented](#expression-oriented)
 - [Enums](#enums)
