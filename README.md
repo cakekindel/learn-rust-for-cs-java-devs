@@ -22,12 +22,13 @@ Rust, with the end goal of arriving at the Rust language.
     - [Mutability](#mutability)
     - [Data Ownership](#data-ownership)
     - [Borrowing](#borrowing)
-- [Expression oriented](#expression-oriented)
-- [Enums](#enums)
-    - [Variants of different types](#variants-of-different-types)
-    - [Variant "Instances"](#variant-instances)
-    - [Tuple Variants](#tuple-variants)
-    - [Struct Variants](#struct-variants)
+- [Language Features](#language-features)
+    - [Expression oriented](#expression-oriented)
+    - [Enums](#enums)
+        - [Variants of different types](#variants-of-different-types)
+        - [Variant "Instances"](#variant-instances)
+        - [Tuple Variants](#tuple-variants)
+        - [Struct Variants](#struct-variants)
 
 ## Why this guide exists
 As someone who was at one point only comfortable
@@ -223,7 +224,17 @@ fn main() {
 }
 ```
 
-## Expression Oriented
+## Language Features
+If that all made sense, take a moment to pat yourself on the back. No, really.
+
+Truly understanding the **Borrow checker** is one of the biggest hurdles to being productive in Rust.
+
+If you enter the Rust community armed knowing _why_ the borrow checker is the way it is,
+you'll be much better positioned to **predict its behavior** when you write your first Rust program.
+
+With that, let's run through some other big picture language semantics in the context of C#.
+
+### Expression Oriented
 In Java & C#, the _statements_ in a code block do not resolve to values.
 
 For example:
@@ -242,72 +253,64 @@ public class Dice
 
 In our example, `new Random()` is a C# _expression_ that resolves to an instance
 of the `Random` class. `var random = new Random()` however is a _statement_ that
-does not resolve to a value, not even `void`. In this language, there is a rough
-tacit rule that each line in your program's code is an instructional step,
-not an expression that resolves to a value.
+does not resolve to a value, not even `void`.
 
-Believe it or not, you already know this! If you're familiar with a ternary
-statement, you can reason about `if / else` statements as being the **statement**
-based conditional idiom, while ternary statements are the **expression-based**
-conditional idiom.
+In C# & Java, there is a tacit rule: each line in your program's code is
+an instructional step, not an expression that resolves to a value.
 
-Imagine if **both** methods in the following code snippet were OK with the
-C# compiler, and semantically equivalent:
+If you're familiar with ternary statements,
+you can reason about `if / else` statements as being the **statement** based conditional idiom,
+while ternary statements are the **expression-based** conditional idiom.
 
+In Rust, you can think of everything as being an expression, or able to return a value.
+
+`if / else` statements, for example will "return" a value if they end in an expression
+not followed by a semicolon:
+
+```rust
+pub struct Game {
+    can_move: bool,
+}
+
+impl Game {
+    pub fn get_spaces_to_move(&self) -> i8 {
+        if self.can_move {
+            Dice::roll()
+        } else {
+            0
+        }
+    }
+}
+```
+ 
+Note that this isn't terribly different from ternary statements:
 ```cs
 public class Game
 {
     private bool canMove = true;
     
-    public void GetSpacesToMove_Ternary()
+    public void GetSpacesToMove()
     {
         return this.canMove ? new Dice().Roll() : 0;
-    }
-
-    public void GetSpacesToMove_IfStatements()
-    {
-        return if (this.canMove)
-        {
-            new Dice().Roll();
-        }
-        else
-        {
-            0;
-        }
     }
 
     // <snip>
 }
 ```
 
-If you're wondering "why would you make this change? We already have ternary statements,
-and this is _more_ verbose!", with some syntactic changes to `if` statements, you
-could argue that ternary statements are wholly unnecessary:
+Rust also extends this philosophy to function bodies;
+If the last statement isn't terminated by a semicolon,
+then the `return` keyword isn't necessary:
 
-```cs
-// ternary
-this.canMove ? new Dice().Roll() : 0
-
-// vs our tersified if statements:
-if this.canMove { new Dice().Roll() } else { 0 }
-```
-
-You don't have to prefer the expression-based terse if statements, but now you're familiar with
-the semantics of Rust's conditional statements.
-
-This is important, because if everything resolves to a value,
-then you can make the `return` statements **optional** if the last line in a function
-body is an expression.
-
-```cs
-public int Roll()
-{
-    var random = new Random();
+```rust
+pub fn roll() -> i8 {
+    let random = Random::new();
 
     random.Next(1, 6)
 }
+```
 
-// real C# equivalent:
+```cs
 public int Roll()
 {
     var random = new Random();
@@ -316,11 +319,10 @@ public int Roll()
 }
 ```
 
-You don't have to love this language feature, but in a world where everything
-is an expression, you'll probably come across **function bodies** that
-end with an expression rather than a return statement.
+You don't have to love this language feature, but will definitely come across
+function declarations like this along your Rust journey.
 
-## Enums
+### Enums
 The Rust `enum` idiom, and the C# `enum` idiom are _very_ different.
 
 Given a C#-style enum like this:
@@ -335,7 +337,7 @@ public enum Coin
 
 It may be helpful to think of an "instance" of this `Coin` enum as `1` OR `2` OR `3`.
 
-### Variants of different types
+#### Variants of different types
 What if enums supported each member, or _Variant_, having different types?
 
 ```cs
@@ -365,7 +367,7 @@ public int AppraiseCoin(Coin coin)
 }
 ```
 
-### Variant "Instances"
+#### Variant "Instances"
 What if the types contained in enums did not have to be constant values?
 
 Let's say you're dealing with IP Addresses and want to have a strongly-typed
@@ -378,8 +380,9 @@ public enum IpAddress
 }
 ```
 
-In this example, if one had a variable of type `IpAddress`,
-the variable contains a string that represents the full IP address.
+Let's break this down a bit, so what this means practically now is that
+when you have an "instance" of an `IpAddress`, it is **either** a `string`
+of kind `V4` **or** a `string` of kind `V6`.
 
 This allows one to use patterns like this:
 ```cs
@@ -429,9 +432,7 @@ A couple things to note here:
     pattern-matching over IpAddress _immediately_ breaks, telling the maintainers
     all the places where the new case is not considered.
 
-**PLEASE STOP READING** until that all makes logical sense as a language feature, and as a construct that you can imagine using.
-
-### Tuple Variants
+#### Tuple Variants
 That's neat and all, but an IPV4 is a 4-segment string of integers, not a string.
 How could we better represent that constraint with **types** so that requirement
 is enforced at compile-time?
@@ -446,7 +447,7 @@ public enum IpAddress
 }
 ```
 
-### Struct Variants
+#### Struct Variants
 let's expand the idea that a variant can contain multiple positional values,
 to multiple **named** values.
 
