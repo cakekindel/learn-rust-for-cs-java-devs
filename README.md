@@ -368,8 +368,7 @@ public enum IpAddress
 }
 ```
 
-What this means practically now: When you have an "instance" of an `IpAddress`,
-it is **either**:
+Now, when you have an "instance" of an `IpAddress`, it is **either**:
 - a `string` of kind `V4`
 **or**
 - a `string` of kind `V6`.
@@ -507,20 +506,15 @@ are our way of expressing that a value may be in one of many states:
 ```rust
 use serde::{Deserialize, Serialize};
 
-// Tell serde to conditionally deserialize based on the "type" property
 #[serde(tag = "type", rename_all = "camelCase")]
 #[derive(Deserialize, Serialize)]
 pub enum Event {
-    // if "type" is "message_sent", 
     #[serde(rename = "message_sent")]
-    // then deserialize into this structure:
     MessageSent {
         message_text: String,
     },
 
-    // if "type" is "message_deleted", 
     #[serde(rename = "message_deleted")]
-    // then deserialize into this structure:
     MessageDeleted {
         message_ts: String
     }
