@@ -324,33 +324,36 @@ function declarations like this along your Rust journey.
 ### Enums
 The Rust `enum` idiom, and the C# `enum` idiom are _very_ different.
 
-Given a C#-style enum like this:
-```cs
-public enum Coin
-{
-    Quarter = 1,
-    Nickel = 2,
-    Dime = 3
-}
-```
+In C#, an `enum` represents a set of named integer constants -
+a _very_ shallow slice of polymorphism - which works fine for C# code!
 
-It may be helpful to think of an "instance" of this `Coin` enum as `1` OR `2` OR `3`.
+In Rust however, we use `enum`s to represent nearly all polymorphic data structures.
+
+In other words, Rust enums are the idiomatic way of expressing multiple states or shapes
+that a value might be in.
+
+> Note: Java enums are somewhere inbetween, this may not feel as foreign to Java devs
+
+Let's add functionality + semantics to C# enums and arrive at Rust enums!
 
 #### Variants of different types
-What if enums supported each member, or _Variant_, having different types?
+Let's first allow enum members of different types than just `int`,
+and each member to have different types:
 
 ```cs
 public enum Coin
 {
-    Quarter = 0.25, // float
-    Nickel = 0.05, // float
-    Dollar = 1, // int
+    Quarter = 0.25,  // float
+    Nickel = 0.05,   // float
+    Dollar = 1,      // int
     Hapenny = 0.005, // float
-    Default = null // always null
+    Default = 0      // int
 }
 ```
 
-Now this `Coin` enum means `0.25` OR `0.05` OR `null` OR `1`.
+Now this `Coin` enum means `1` OR `0.25` OR `0.05` OR `0`,
+which lets us concisely tie a kind of `Coin` to its numeric
+dollar value.
 
 #### Variant "Instances"
 What if the types contained in enums did not have to be constant values?
@@ -365,9 +368,11 @@ public enum IpAddress
 }
 ```
 
-Let's break this down a bit, so what this means practically now is that
-when you have an "instance" of an `IpAddress`, it is **either** a `string`
-of kind `V4` **or** a `string` of kind `V6`.
+What this means practically now: When you have an "instance" of an `IpAddress`,
+it is **either**:
+- a `string` of kind `V4`
+**or**
+- a `string` of kind `V6`.
 
 This allows one to use patterns like this:
 ```cs
@@ -387,7 +392,7 @@ public class TcpHelper
 }
 ```
 
-Vanilla C# equivalent:
+In C#:
 ```cs
 public class TcpHelper
 {
