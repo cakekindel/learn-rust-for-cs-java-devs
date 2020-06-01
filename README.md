@@ -235,34 +235,29 @@ you'll be much better positioned to **predict its behavior** when you write your
 With that, let's run through some other big picture language semantics in the context of C#.
 
 ### Expression Oriented
-In Java & C#, the _statements_ in a code block do not resolve to values.
+In C# & Java, there is a tacit rule: each line in your program's code is
+an instructional step, not an expression that resolves to a value.
 
-For example:
+For example let's break down a basic code sample:
 ```cs
 public class Dice
 {
     public void Roll()
     {
         var random = new Random();
+        //         This resolves to a value
+        //            vvvvvvvvvvvvvvvvv
         int diceVal = random.Next(1, 6);
+    //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    //           This does not
 
         return diceVal;
     }
 }
 ```
 
-In our example, `new Random()` is a C# _expression_ that resolves to an instance
-of the `Random` class. `var random = new Random()` however is a _statement_ that
-does not resolve to a value, not even `void`.
-
-In C# & Java, there is a tacit rule: each line in your program's code is
-an instructional step, not an expression that resolves to a value.
-
-If you're familiar with ternary statements,
-you can reason about `if / else` statements as being the **statement** based conditional idiom,
-while ternary statements are the **expression-based** conditional idiom.
-
-In Rust, you can think of everything as being an expression, or able to return a value.
+In Rust, you can think of **everything** as being an expression,
+or able to resolve to a value.
 
 `if / else` statements, for example will "return" a value if they end in an expression
 not followed by a semicolon:
@@ -291,7 +286,9 @@ public class Game
     
     public void GetSpacesToMove()
     {
-        return this.canMove ? new Dice().Roll() : 0;
+        return this.canMove
+            ? new Dice().Roll()
+            : 0;
     }
 
     // <snip>
@@ -299,6 +296,7 @@ public class Game
 ```
 
 Rust also extends this philosophy to function bodies;
+
 If the last statement isn't terminated by a semicolon,
 then the `return` keyword isn't necessary:
 
@@ -306,10 +304,11 @@ then the `return` keyword isn't necessary:
 pub fn roll() -> i8 {
     let random = Random::new();
 
-    random.Next(1, 6)
+    random.next(1, 6)
 }
 ```
 
+In C#:
 ```cs
 public int Roll()
 {
@@ -351,21 +350,7 @@ public enum Coin
 }
 ```
 
-Now this `Coin` enum means "0.25 or 0.05 or null or 1"
-
-When handling this `Coin` enum, one might use the
-pattern-matching features in C# 8 like so:
-
-```cs
-public int AppraiseCoin(Coin coin)
-{
-    return coin switch
-    {
-        Coin.Quarter => /* algorithm to appraise quarters? */,
-        // <snip>
-    };
-}
-```
+Now this `Coin` enum means `0.25` OR `0.05` OR `null` OR `1`.
 
 #### Variant "Instances"
 What if the types contained in enums did not have to be constant values?
@@ -397,16 +382,16 @@ public class TcpHelper
         }
     }
 
-    private TcpConnection ConnectIpV4(string addrRaw);
-    private TcpConnection ConnectIpV6(string addrRaw);
+    private TcpConnection ConnectIpV4(string addrRaw) { /* <snip> */ } 
+    private TcpConnection ConnectIpV6(string addrRaw) { /* <snip> */ } 
 }
 ```
 
-Contrast this with a vanilla C# implementation:
+Vanilla C# equivalent:
 ```cs
 public class TcpHelper
 {
-    public TcpConnection Connect(IpAddress addr)
+    public TcpConnection Connect(string addr)
     {
         if (IsIpV4(addr))
         {
@@ -420,6 +405,9 @@ public class TcpHelper
 
     private bool IsIpV4(string addrRaw) { /* <snip> */ } 
     private bool IsIpV6(string addrRaw) { /* <snip> */ } 
+
+    private TcpConnection ConnectIpV4(string addrRaw) { /* <snip> */ } 
+    private TcpConnection ConnectIpV6(string addrRaw) { /* <snip> */ } 
 }
 ```
 
@@ -428,8 +416,9 @@ A couple things to note here:
     have no hints at the type level that the given string is an Ip Address
     v4, v6, or even an Ip Address at all.
 
-- By using Enums this way, if a hypothetical IPV8 was introduced, **all code**
-    pattern-matching over IpAddress _immediately_ breaks, telling the maintainers
+- With our supercharged enums, if a hypothetical IPV8 was introduced,
+    **all code** pattern-matching over IpAddress _immediately_ breaks!
+    This is incredibly valuable because the maintainers are made immediately aware of
     all the places where the new case is not considered.
 
 #### Tuple Variants
@@ -448,11 +437,92 @@ public enum IpAddress
 ```
 
 #### Struct Variants
-let's expand the idea that a variant can contain multiple positional values,
+Let's expand the idea that a variant can contain multiple positional values,
 to multiple **named** values.
 
-Imagine an embedded `struct` in each "instance" of an enum variant:
+##### Motivating Example - Polymorphic JSON Payloads
+
+Let's say you are receiving JSON webhook events which may be of several
+different kinds, each with their own object schema:
+
+```json
+// message sent event
+{
+    "type": "message_sent",
+    "messageText": "i'm a message!"
+}
+
+// message deleted event
+{
+    "type": "message_deleted",
+    "messageTimestamp": 1294190015
+}
+```
+
+In C# / Java, we represent the idea of a value being in one of many states with inheritance:
 ```cs
-TODO: EXAMPLE :)
+[JsonConverter(typeof(StringEnumConverter))]
+enum EventType
+{
+    [JsonProperty(Name = "message_sent")]
+    MessageSent,
+    [JsonProperty(Name = "message_deleted")]
+    MessageDeleted
+}
+
+class EventBase
+{
+    public EventType Type { get; set; }
+}
+
+class MessageSentEvent : EventBase
+{
+    public EventType Type { get => EventType.MessageSent; }
+    public string MessageText { get; set; }
+}
+
+class EventDeserializer
+{
+    public EventBase Deserialize(string eventJson)
+    {
+        EventBase eventBase = JsonConvert.Deserialize<EventBase>(eventJson);
+        EventType type = eventBase.Type;
+
+        return type switch {
+            EventType.MessageSent => JsonConvert.Deserialize<MessageSentEvent>(eventJson),
+            EventType.MessageDeleted => JsonConvert.Deserialize<MessageDeleted>(eventJson),
+        };
+    }
+}
+```
+
+In Rust, we can solve this problem with enums, because Rust enums
+are our way of expressing that a value may be in one of many states:
+
+```rust
+use serde::{Deserialize, Serialize};
+
+// Tell serde to conditionally deserialize based on the "type" property
+#[serde(tag = "type", rename_all = "camelCase")]
+#[derive(Deserialize, Serialize)]
+pub enum Event {
+    // if "type" is "message_sent", 
+    #[serde(rename = "message_sent")]
+    // then deserialize into this structure:
+    MessageSent {
+        message_text: String,
+    },
+
+    // if "type" is "message_deleted", 
+    #[serde(rename = "message_deleted")]
+    // then deserialize into this structure:
+    MessageDeleted {
+        message_ts: String
+    }
+}
+
+pub fn deserialize_event(event_json: String) -> Event {
+    serde_json::from_str(&event_json).unwrap()
+}
 ```
 
